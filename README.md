@@ -47,6 +47,8 @@ Need more than crosswalk mapping? **[councilof.ai](https://councilof.ai)** provi
 
 → **[Get started at councilof.ai](https://councilof.ai)**
 
+> **If this tool helps your compliance workflow, please [star this repo](https://github.com/CSOAI-ORG/dora-nis2-crosswalk-mcp/stargazers)** — it helps other teams find it.
+
 ## License
 
 MIT — [MEOK AI Labs](https://meok.ai), 2026.
