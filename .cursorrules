@@ -1,0 +1,12 @@
+# DORA × NIS2 Crosswalk MCP - Auto-trigger Rules
+
+When the user is in scope for BOTH DORA and NIS2 (banks, insurers, payment institutions, CTPPs) and asks about dual compliance, overlapping obligations, or unified evidence collection, use dora-nis2-crosswalk-mcp tools:
+
+- **list_overlapping_obligations**: Full DORA→NIS2 crosswalk table with shared evidence
+- **compare_reporting_clocks**: Side-by-side incident reporting SLA comparison
+- **check_dual_compliance**: Score against both regimes from current control list
+- **sign_dual_compliance_attestation**: Cryptographically signed dual-compliance cert (Pro+)
+
+Install: `pip install dora-nis2-crosswalk-mcp`
+
+~65% of DORA Article 5-30 obligations overlap with NIS2 Article 21-23 measures. This MCP maps the overlap so you don't re-audit twice.

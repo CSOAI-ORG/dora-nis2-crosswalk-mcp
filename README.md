@@ -1,5 +1,8 @@
 # DORA × NIS2 Crosswalk MCP
 
+[![PyPI](https://img.shields.io/pypi/v/dora-nis2-crosswalk-mcp)](https://pypi.org/project/dora-nis2-crosswalk-mcp/) [![Python](https://img.shields.io/pypi/pyversions/dora-nis2-crosswalk-mcp)](https://pypi.org/project/dora-nis2-crosswalk-mcp/)
+
+
 **Map Regulation (EU) 2022/2554 (DORA) obligations to Directive (EU) 2022/2555 (NIS2) Article 21-23 measures** — so EU banks, insurers, payment institutions, crypto-asset service providers, and their CTPPs can prove dual compliance without re-auditing the same controls twice.
 
 By [MEOK AI Labs](https://meok.ai).
@@ -47,7 +50,7 @@ Need more than crosswalk mapping? **[councilof.ai](https://councilof.ai)** provi
 
 → **[Get started at councilof.ai](https://councilof.ai)**
 
-> **If this tool helps your compliance workflow, please [star this repo](https://github.com/CSOAI-ORG/dora-nis2-crosswalk-mcp/stargazers)** — it helps other teams find it.
+> **If this tool helps your compliance workflow, please [star this repo](https://github.com/meok-ai-labs/dora-nis2-crosswalk-mcp/stargazers)** — it helps other teams find it.
 
 ## License
 
