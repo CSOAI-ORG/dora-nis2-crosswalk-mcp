@@ -52,3 +52,5 @@ Need more than crosswalk mapping? **[councilof.ai](https://councilof.ai)** provi
 ## License
 
 MIT — [MEOK AI Labs](https://meok.ai), 2026.
+
+<!-- mcp-name: io.github.CSOAI-ORG/dora-nis2-crosswalk-mcp -->
