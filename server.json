@@ -1,17 +1,18 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.meok-ai-labs/dora-nis2-crosswalk-mcp",
-  "description": "DORA \u2194 NIS2 \u2194 ISO 27001 \u2194 SOC 2 control mapping \u2014 by MEOK AI Labs.",
+  "name": "io.github.CSOAI-ORG/dora-nis2-crosswalk-mcp",
+  "version": "1.0.2",
+  "description": "DORA \u00d7 NIS2 Crosswalk MCP \u2014 map Regulation (EU) 2022/2554 obligations to Directive (EU) 2022/255...",
   "repository": {
-    "url": "https://github.com/meok-ai-labs/dora-nis2-crosswalk-mcp",
+    "url": "https://github.com/CSOAI-ORG/dora-nis2-crosswalk-mcp",
     "source": "github"
   },
-  "version": "1.0.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "dora-nis2-crosswalk-mcp",
-      "version": "1.0.0",
+      "version": "1.0.2",
+      "runtimeHint": "python",
       "transport": {
         "type": "stdio"
       }
