@@ -21,104 +21,66 @@ Install: pip install dora-nis2-crosswalk-mcp
 Run:     python server.py
 """
 
+from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel, Field
+from typing import List, Dict, Any, Optional
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Optional
 from collections import defaultdict
-from mcp.server.fastmcp import FastMCP
-
 import os as _os
 import sys
 import os
 
-_MEOK_API_KEY = _os.environ.get("MEOK_API_KEY", "")
+# --- Pydantic Models for Structured Output ---
 
-try:
-    from auth_middleware import check_access as _shared_check_access
-    _AUTH_ENGINE_AVAILABLE = True
-except ImportError:
-    _AUTH_ENGINE_AVAILABLE = False
+class ObligationDetail(BaseModel):
+    nis2_equivalent: str
+    shared_evidence: List[str]
+    dora_specific: str
+    nis2_specific: str
+    satisfies_both_if: str
 
-    def _shared_check_access(api_key: str = ""):
-        """Fallback when shared auth engine is not available."""
-        if _MEOK_API_KEY and api_key and api_key == _MEOK_API_KEY:
-            return True, "OK", "pro"
-        if _MEOK_API_KEY and api_key and api_key != _MEOK_API_KEY:
-            return False, "Invalid API key. Get one at https://meok.ai/api-keys", "free"
-        return True, "OK", "free"
+class CrosswalkResponse(BaseModel):
+    legal_basis: str
+    crosswalk: Dict[str, ObligationDetail]
+    overlap_percent_estimate: int
+    disclaimer: str
+    upsell_pro: Optional[str] = None
+    branding: str = "Built by MEOK AI Labs | https://meok.ai"
 
+class ReportingClockDetail(BaseModel):
+    trigger: str
+    initial: Optional[str] = None
+    early_warning: Optional[str] = None
+    incident_notification: Optional[str] = None
+    intermediate: Optional[str] = None
+    final: Optional[str] = None
+    final_report: Optional[str] = None
+    progress_report: Optional[str] = None
+    authority: str
 
-try:
-    from attestation import get_attestation_tool_response
-    _ATTESTATION_LOCAL = True
-except ImportError:
-    _ATTESTATION_LOCAL = False
+class ClocksResponse(BaseModel):
+    reporting_clocks: Dict[str, ReportingClockDetail]
+    practical_implication: str
+    branding: str = "Built by MEOK AI Labs | https://meok.ai"
 
-_ATTESTATION_API = _os.environ.get(
-    "MEOK_ATTESTATION_API", "https://meok-attestation-api.vercel.app"
-)
+class ComplianceObligationResult(BaseModel):
+    obligation: str
+    nis2_equivalent: str
+    state: str
+    satisfies_both_if: str
+    matched_controls: List[str]
 
+class ComplianceResponse(BaseModel):
+    entity: str
+    overall_dual_compliance_percent: float
+    obligations: List[ComplianceObligationResult]
+    upsell_pro: Optional[str] = None
+    branding: str = "Built by MEOK AI Labs | https://meok.ai"
 
-def _sign_via_api(api_key, regulation, entity, score, findings, articles_audited, tier="pro", include_pdf_base64=False):
-    import urllib.request as _url, urllib.error as _urlerr
-    payload = {"api_key": api_key, "regulation": regulation, "entity": entity,
-               "score": score, "findings": findings or [],
-               "articles_audited": articles_audited or [], "tier": tier}
-    try:
-        req = _url.Request(f"{_ATTESTATION_API}/sign",
-                           data=json.dumps(payload).encode("utf-8"),
-                           headers={"Content-Type": "application/json"})
-        with _url.urlopen(req, timeout=15) as resp:
-            return json.loads(resp.read())
-    except _urlerr.HTTPError as e:
-        try:
-            return json.loads(e.read())
-        except Exception:
-            return {"error": f"Attestation API HTTP {e.code}. Contact hello@meok.ai."}
-    except Exception as e:
-        return {"error": f"Could not reach MEOK attestation API: {e}."}
+# --- Constants & Data ---
 
-
-def _attestation(regulation, entity, score, findings, articles_audited, tier, include_pdf_base64, api_key):
-    if _ATTESTATION_LOCAL:
-        return get_attestation_tool_response(
-            regulation=regulation, entity=entity, score=score, findings=findings,
-            articles_audited=articles_audited, tier=tier, include_pdf_base64=include_pdf_base64,
-        )
-    return _sign_via_api(api_key=api_key, regulation=regulation, entity=entity,
-                        score=score, findings=findings, articles_audited=articles_audited or [],
-                        tier=tier, include_pdf_base64=include_pdf_base64)
-
-
-def check_access(api_key: str = ""):
-    return _shared_check_access(api_key)
-
-
-FREE_DAILY_LIMIT = 10
-_usage: dict[str, list[datetime]] = defaultdict(list)
-STRIPE_199 = "https://buy.stripe.com/14A4gB3K4eUWgYR56o8k836"
-STRIPE_1499 = "https://buy.stripe.com/4gM9AV80kaEG0ZT42k8k837"
-STRIPE_5K = "https://buy.stripe.com/4gM7sN2G0bIKeQJfL28k833"
-
-
-def _rl(tier="free") -> Optional[str]:
-    if tier in ("pro", "professional", "enterprise"):
-        return None
-    now = datetime.now(timezone.utc)
-    cutoff = now - timedelta(days=1)
-    _usage["anonymous"] = [t for t in _usage["anonymous"] if t > cutoff]
-    if len(_usage["anonymous"]) >= FREE_DAILY_LIMIT:
-        return f"Free tier limit ({FREE_DAILY_LIMIT}/day). Pro £199/mo: {STRIPE_199}"
-    _usage["anonymous"].append(now)
-    return None
-
-
-# ── DORA ↔ NIS2 Crosswalk ──────────────────────────────────────
-# For each DORA obligation cluster, the equivalent NIS2 Article 21(2) measure.
-# Mapping is based on: EBA/ESMA joint opinion on DORA-NIS2 interplay (2024),
-# Commission DORA/NIS2 guidance, and practitioner consensus. NOT legal advice.
-
-CROSSWALK = {
+CROSSWALK_DATA = {
     "DORA Art 5 — Governance & organisation": {
         "nis2_equivalent": "NIS2 Art 20 — Governance + Art 21(2)(a) risk analysis policies",
         "shared_evidence": ["Board-approved ICT/security policy", "Named senior accountable person"],
@@ -177,7 +139,7 @@ CROSSWALK = {
     },
 }
 
-REPORTING_CLOCKS = {
+REPORTING_CLOCKS_DATA = {
     "DORA": {
         "trigger": "Classification as 'major ICT incident' per (EU) 2024/1772",
         "initial": "4 hours from classification",
@@ -195,76 +157,107 @@ REPORTING_CLOCKS = {
     },
 }
 
+# --- Utils ---
+
+_MEOK_API_KEY = _os.environ.get("MEOK_API_KEY", "")
+
+try:
+    from auth_middleware import check_access as _shared_check_access
+    _AUTH_ENGINE_AVAILABLE = True
+except ImportError:
+    _AUTH_ENGINE_AVAILABLE = False
+    def _shared_check_access(api_key: str = ""):
+        if _MEOK_API_KEY and api_key and api_key == _MEOK_API_KEY:
+            return True, "OK", "pro"
+        return True, "OK", "free"
+
+try:
+    from attestation import get_attestation_tool_response
+    _ATTESTATION_LOCAL = True
+except ImportError:
+    _ATTESTATION_LOCAL = False
+
+_ATTESTATION_API = _os.environ.get("MEOK_ATTESTATION_API", "https://meok-attestation-api.vercel.app")
+
+def _sign_via_api(api_key, regulation, entity, score, findings, articles_audited, tier="pro", include_pdf_base64=False):
+    import urllib.request as _url, urllib.error as _urlerr
+    payload = {"api_key": api_key, "regulation": regulation, "entity": entity, "score": score, "findings": findings or [], "articles_audited": articles_audited or [], "tier": tier}
+    try:
+        req = _url.Request(f"{_ATTESTATION_API}/sign", data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"})
+        with _url.urlopen(req, timeout=15) as resp:
+            return json.loads(resp.read())
+    except _urlerr.HTTPError as e:
+        try: return json.loads(e.read())
+        except: return {"error": f"Attestation API HTTP {e.code}"}
+    except Exception as e:
+        return {"error": str(e)}
+
+def _attestation(regulation, entity, score, findings, articles_audited, tier, include_pdf_base64, api_key):
+    if _ATTESTATION_LOCAL:
+        return get_attestation_tool_response(regulation=regulation, entity=entity, score=score, findings=findings, articles_audited=articles_audited, tier=tier, include_pdf_base64=include_pdf_base64)
+    return _sign_via_api(api_key=api_key, regulation=regulation, entity=entity, score=score, findings=findings, articles_audited=articles_audited or [], tier=tier, include_pdf_base64=include_pdf_base64)
+
+FREE_DAILY_LIMIT = 10
+_usage = defaultdict(list)
+STRIPE_199 = "https://buy.stripe.com/00wfZjcgAeUW4c5cyQ8k90K"
+
+def _rl(tier="free"):
+    if tier in ("pro", "professional", "enterprise"): return None
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(days=1)
+    _usage["anonymous"] = [t for t in _usage["anonymous"] if t > cutoff]
+    if len(_usage["anonymous"]) >= FREE_DAILY_LIMIT:
+        return f"Free tier limit ({FREE_DAILY_LIMIT}/day). Pro £199/mo: {STRIPE_199}"
+    _usage["anonymous"].append(now)
+    return None
+
+# --- MCP Setup ---
 
 mcp = FastMCP(
     "dora-nis2-crosswalk",
-    instructions=(
-        "MEOK AI Labs DORA × NIS2 Crosswalk MCP. Maps DORA (Regulation (EU) 2022/2554) "
-        "obligations to NIS2 (Directive (EU) 2022/2555) Article 21-23 measures and vice versa. "
-        "Primary use: banks + insurers + payment institutions + CTPPs in scope for both. "
-        "Ask me to list overlapping obligations, check dual compliance, compare reporting "
-        "clocks, or issue a signed dual-compliance attestation."
-    ),
+    instructions="MEOK AI Labs DORA × NIS2 Crosswalk MCP. Maps DORA obligations to NIS2 Article 21-23 measures.",
 )
 
+@mcp.tool()
+def list_overlapping_obligations(api_key: str = "") -> CrosswalkResponse:
+    """Return the full DORA → NIS2 crosswalk table with shared evidence."""
+    allowed, msg, tier = _shared_check_access(api_key)
+    if not allowed: return {"error": msg}
+    if err := _rl(tier): return {"error": err}
+    
+    crosswalk = {k: ObligationDetail(**v) for k, v in CROSSWALK_DATA.items()}
+    return CrosswalkResponse(
+        legal_basis="DORA = Regulation (EU) 2022/2554 | NIS2 = Directive (EU) 2022/2555",
+        crosswalk=crosswalk,
+        overlap_percent_estimate=65,
+        disclaimer="Estimate based on practitioner consensus 2024. Not legal advice.",
+        upsell_pro=f"Pro £199/mo: {STRIPE_199}" if tier == "free" else None
+    )
 
 @mcp.tool()
-def list_overlapping_obligations(api_key: str = "") -> str:
-    """Return the full DORA → NIS2 crosswalk table with shared evidence + regime-specific
-    requirements + 'satisfies both if' test."""
-    allowed, msg, tier = check_access(api_key)
-    if not allowed:
-        return json.dumps({"error": msg, "upgrade_url": STRIPE_199})
-    if err := _rl(tier):
-        return json.dumps({"error": err, "upgrade_url": STRIPE_199})
-    return json.dumps({
-        "legal_basis": "DORA = Regulation (EU) 2022/2554 | NIS2 = Directive (EU) 2022/2555",
-        "crosswalk": CROSSWALK,
-        "overlap_percent_estimate": 65,
-        "disclaimer": "Estimate based on EBA/ESMA joint opinion + practitioner consensus 2024. Not legal advice.",
-        "upsell_pro": f"Pro £199/mo unlocks dual-compliance gap analysis + signed attestations: {STRIPE_199}" if tier == "free" else None,
-    }, indent=2)
-
-
-@mcp.tool()
-def compare_reporting_clocks(api_key: str = "") -> str:
+def compare_reporting_clocks(api_key: str = "") -> ClocksResponse:
     """Show side-by-side DORA vs NIS2 incident-reporting clocks."""
-    allowed, msg, tier = check_access(api_key)
-    if not allowed:
-        return json.dumps({"error": msg, "upgrade_url": STRIPE_199})
-    return json.dumps({
-        "reporting_clocks": REPORTING_CLOCKS,
-        "practical_implication": (
-            "If you are in scope for BOTH and a single ICT incident meets BOTH classification "
-            "thresholds, you must notify BOTH authorities in parallel. The NIS2 24h early warning "
-            "is the tightest SLA — design detection + escalation to that clock."
-        ),
-    }, indent=2)
-
+    allowed, msg, tier = _shared_check_access(api_key)
+    if not allowed: return {"error": msg}
+    
+    clocks = {k: ReportingClockDetail(**v) for k, v in REPORTING_CLOCKS_DATA.items()}
+    return ClocksResponse(
+        reporting_clocks=clocks,
+        practical_implication="NIS2 24h early warning is the tightest SLA — design to that clock."
+    )
 
 @mcp.tool()
-def check_dual_compliance(
-    entity_name: str,
-    controls_csv: str,
-    api_key: str = "",
-) -> str:
-    """Score dual DORA + NIS2 compliance given a comma-separated list of current controls.
-
-    Each crosswalk row is scored PASS / PARTIAL / GAP based on how many 'satisfies-both'
-    test keywords match the controls list.
-    """
-    allowed, msg, tier = check_access(api_key)
-    if not allowed:
-        return json.dumps({"error": msg, "upgrade_url": STRIPE_199})
-    if err := _rl(tier):
-        return json.dumps({"error": err, "upgrade_url": STRIPE_199})
+def check_dual_compliance(entity_name: str, controls_csv: str, api_key: str = "") -> ComplianceResponse:
+    """Score dual DORA + NIS2 compliance given current controls."""
+    allowed, msg, tier = _shared_check_access(api_key)
+    if not allowed: return {"error": msg}
+    if err := _rl(tier): return {"error": err}
 
     controls = [c.strip().lower() for c in controls_csv.split(",") if c.strip()]
     results = []
     passes = 0
-    for obligation, detail in CROSSWALK.items():
+    for obligation, detail in CROSSWALK_DATA.items():
         satisfies = detail["satisfies_both_if"].lower()
-        # naïve keyword score — count how many controls are mentioned in the satisfies test
         matches = [c for c in controls if c in satisfies or any(w in satisfies for w in c.split())]
         if len(matches) >= 2:
             state, score = "PASS", 1.0
@@ -274,58 +267,42 @@ def check_dual_compliance(
             passes += 0.5
         else:
             state, score = "GAP", 0.0
-        results.append({
-            "obligation": obligation,
-            "nis2_equivalent": detail["nis2_equivalent"],
-            "state": state,
-            "satisfies_both_if": detail["satisfies_both_if"],
-            "matched_controls": matches,
-        })
+        results.append(ComplianceObligationResult(
+            obligation=obligation,
+            nis2_equivalent=detail["nis2_equivalent"],
+            state=state,
+            satisfies_both_if=detail["satisfies_both_if"],
+            matched_controls=matches
+        ))
 
-    overall_score = round(100 * passes / len(CROSSWALK), 1)
-    return json.dumps({
-        "entity": entity_name,
-        "overall_dual_compliance_percent": overall_score,
-        "obligations": results,
-        "upsell_pro": f"Pro £199/mo: signed dual-compliance attestation + gap-remediation plan: {STRIPE_199}" if tier == "free" else None,
-    }, indent=2)
-
+    overall_score = round(100 * passes / len(CROSSWALK_DATA), 1)
+    return ComplianceResponse(
+        entity=entity_name,
+        overall_dual_compliance_percent=overall_score,
+        obligations=results,
+        upsell_pro=f"Pro £199/mo: {STRIPE_199}" if tier == "free" else None
+    )
 
 @mcp.tool()
-def sign_dual_compliance_attestation(
-    entity_name: str,
-    overall_score: float,
-    findings_csv: str = "",
-    include_pdf_base64: bool = False,
-    api_key: str = "",
-) -> str:
+def sign_dual_compliance_attestation(entity_name: str, overall_score: float, findings_csv: str = "", include_pdf_base64: bool = False, api_key: str = "") -> Dict[str, Any]:
     """Generate a cryptographically signed DORA × NIS2 dual-compliance attestation (Pro+)."""
-    allowed, msg, tier = check_access(api_key)
-    if not allowed:
-        return json.dumps({"error": msg, "upgrade_url": STRIPE_199})
+    allowed, msg, tier = _shared_check_access(api_key)
+    if not allowed: return {"error": msg}
     if tier == "free":
-        return json.dumps({
-            "error": "Signed attestations require Pro (£199/mo) or Enterprise tier.",
-            "upgrade_url": STRIPE_199,
-            "why_pro": "Board-ready dual-compliance evidence for EU banks and financial entities.",
-        })
+        return {"error": "Signed attestations require Pro (£199/mo)", "upgrade_url": STRIPE_199}
+    
     findings = [f.strip() for f in findings_csv.split(",") if f.strip()]
-    cert = _attestation(
-        regulation="DORA × NIS2 dual compliance (Regulation (EU) 2022/2554 + Directive (EU) 2022/2555)",
+    return _attestation(
+        regulation="DORA × NIS2 dual compliance",
         entity=entity_name,
         score=overall_score,
-        findings=findings or [f"Overall dual-compliance score: {overall_score}"],
-        articles_audited=list(CROSSWALK.keys()),
+        findings=findings or [f"Score: {overall_score}"],
+        articles_audited=list(CROSSWALK_DATA.keys()),
         tier=tier,
         include_pdf_base64=include_pdf_base64,
         api_key=api_key,
     )
-    return json.dumps(cert, indent=2)
-
-
-def main():
-    mcp.run()
-
 
 if __name__ == "__main__":
-    main()
+    mcp.run()
+
