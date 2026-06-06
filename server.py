@@ -169,7 +169,7 @@ except ImportError:
     def _shared_check_access(api_key: str = ""):
         if _MEOK_API_KEY and api_key and api_key == _MEOK_API_KEY:
             return True, "OK", "pro"
-        return True, "OK", "free"
+        return True, "OK, Pro at https://www.csoai.org/checkout", "free"
 
 try:
     from attestation import get_attestation_tool_response

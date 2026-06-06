@@ -1,0 +1,29 @@
+name: dora-nis2-crosswalk-mcp
+description: 'MCP server: dora-nis2-crosswalk-mcp'
+version: 1.0.5
+author: MEOK AI Labs
+homepage: https://safetyof.ai
+repository: https://github.com/MEOK-AI-Labs/dora-nis2-crosswalk-mcp
+license: MIT
+categories:
+- compliance
+- governance
+tools:
+- name: list_overlapping_obligations
+  description: Return the full DORA → NIS2 crosswalk table with shared evidence +
+    regime-specific
+- name: compare_reporting_clocks
+  description: Show side-by-side DORA vs NIS2 incident-reporting clocks.
+- name: check_dual_compliance
+  description: Score dual DORA + NIS2 compliance given a comma-separated list of current
+    controls.
+- name: sign_dual_compliance_attestation
+  description: Generate a cryptographically signed DORA × NIS2 dual-compliance attestation
+    (Pro+).
+build:
+  type: python
+  entrypoint: server.py
+  dependencies:
+  - mcp>=1.0.0
+runtime:
+  python: '>=3.10'

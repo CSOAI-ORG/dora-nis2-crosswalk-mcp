@@ -1,0 +1,25 @@
+{
+  "name": "dora-nis2-crosswalk-mcp",
+  "title": "Dora Nis2 Crosswalk Mcp",
+  "description": "DORA \u00d7 NIS2 Crosswalk MCP \u2014 map Regulation (EU) 2022/2554 obligations to Directive (EU) 2022/2555 Article 21-23 measures, and vice versa. For EU banks, insurers, payment institutions, crypto-asset service providers, and their CTPPs (critical ICT third-party providers). Dual-compliance scoring + HMAC-signed attestations. By MEOK AI Labs.",
+  "version": "1.0.4",
+  "homepage": "https://meok.ai",
+  "license": "MIT",
+  "transport": {
+    "type": "stdio"
+  },
+  "tools": [
+    {
+      "name": "list_overlapping_obligations"
+    },
+    {
+      "name": "compare_reporting_clocks"
+    },
+    {
+      "name": "check_dual_compliance"
+    },
+    {
+      "name": "sign_dual_compliance_attestation"
+    }
+  ]
+}
