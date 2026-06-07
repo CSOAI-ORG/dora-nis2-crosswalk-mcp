@@ -1,0 +1,59 @@
+{
+  "name": "dora-nis2-crosswalk-mcp",
+  "description": "DORA \u00d7 NIS2 Crosswalk MCP \u2014 map Regulation (EU) 2022/2554 obligations to Directive (EU) 2022/255...",
+  "url": "https://proofof.ai/scorecard/dora-nis2-crosswalk-mcp.html",
+  "version": "1.0.4",
+  "protocolVersion": "0.2.0",
+  "provider": {
+    "organization": "MEOK AI Labs",
+    "url": "https://meok.ai"
+  },
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false
+  },
+  "defaultInputModes": [
+    "text"
+  ],
+  "defaultOutputModes": [
+    "text"
+  ],
+  "skills": [
+    {
+      "id": "list_overlapping_obligations",
+      "name": "List Overlapping Obligations",
+      "description": "list_overlapping_obligations via dora-nis2-crosswalk-mcp",
+      "tags": [
+        "mcp",
+        "compliance"
+      ]
+    },
+    {
+      "id": "compare_reporting_clocks",
+      "name": "Compare Reporting Clocks",
+      "description": "compare_reporting_clocks via dora-nis2-crosswalk-mcp",
+      "tags": [
+        "mcp",
+        "compliance"
+      ]
+    },
+    {
+      "id": "check_dual_compliance",
+      "name": "Check Dual Compliance",
+      "description": "check_dual_compliance via dora-nis2-crosswalk-mcp",
+      "tags": [
+        "mcp",
+        "compliance"
+      ]
+    },
+    {
+      "id": "sign_dual_compliance_attestation",
+      "name": "Sign Dual Compliance Attestation",
+      "description": "sign_dual_compliance_attestation via dora-nis2-crosswalk-mcp",
+      "tags": [
+        "mcp",
+        "compliance"
+      ]
+    }
+  ]
+}

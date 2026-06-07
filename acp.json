@@ -1,0 +1,22 @@
+{
+  "acpVersion": "0.1",
+  "agent": {
+    "name": "dora-nis2-crosswalk-mcp",
+    "description": "DORA \u00d7 NIS2 Crosswalk MCP \u2014 map Regulation (EU) 2022/2554 obligations to Directive (EU) 2022/255...",
+    "version": "1.0.4",
+    "provider": "MEOK AI Labs",
+    "interfaces": [
+      {
+        "type": "mcp",
+        "transport": "stdio",
+        "package": "dora-nis2-crosswalk-mcp"
+      }
+    ],
+    "capabilities": [
+      "list_overlapping_obligations",
+      "compare_reporting_clocks",
+      "check_dual_compliance",
+      "sign_dual_compliance_attestation"
+    ]
+  }
+}
