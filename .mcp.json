@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "dora-nis2-crosswalk-mcp": {
+      "command": "uvx",
+      "args": [
+        "dora-nis2-crosswalk-mcp"
+      ]
+    }
+  }
+}
