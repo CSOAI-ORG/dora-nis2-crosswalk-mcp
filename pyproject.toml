@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "dora-nis2-crosswalk-mcp"
-version = "1.1.3"
+version = "1.1.4"
 description = "DORA × NIS2 Crosswalk MCP — map Regulation (EU) 2022/2554 obligations to Directive (EU) 2022/2555 Article 21-23 measures, and vice versa. For EU banks, insurers, payment institutions, crypto-asset service providers, and their CTPPs (critical ICT third-party providers). Dual-compliance scoring + HMAC-signed attestations. By MEOK AI Labs."
 license = {file = "LICENSE"}
 readme = "README.md"
