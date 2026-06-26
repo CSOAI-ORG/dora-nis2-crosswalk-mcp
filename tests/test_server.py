@@ -64,7 +64,7 @@ class TestDORANIS2Crosswalk:
 
     def test_rate_limiting_free_tier(self):
         server._usage["anonymous"] = []
-        for _ in range(10):
+        for _ in range(server.FREE_DAILY_LIMIT):
             assert server._rl("free") is None
         assert "Free tier limit" in server._rl("free")
 
