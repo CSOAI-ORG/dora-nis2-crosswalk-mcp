@@ -51,14 +51,11 @@ This MCP server is built with **EU AI Act compliance** built-in:
 
 Need help getting compliant? **[Book a free 15-min diagnostic →](https://cal.com/csoai/august-audit)**
 
-## 🏢 Enterprise
+## How MEOK charges
 
-Need custom development, SLA guarantees, or white-label deployment?
+MEOK has no subscriptions and no tiers. You pay per job, and only when the agreed artifact has been delivered to you. There is no public price list. See <https://meok.ai/pricing>.
 
-- **Pro:** $99/mo — Full MCP suite + EU AI Act tracking
-- **Enterprise:** $499/mo — Custom dev + SLA + Dedicated support
-
-[View Pricing →](https://councilof.ai/pricing) | [Contact Sales →](mailto:sales@csoai.org)
+This repository's source is MIT-licensed and free to self-host.
 
 ## 🤝 Part of the MEOK Ecosystem
 
@@ -87,7 +84,7 @@ MIT © [CSOAI-ORG](https://github.com/CSOAI-ORG)
 - **AI Bill of Materials** → `uvx ai-bom-mcp` · [PyPI](https://pypi.org/project/ai-bom-mcp/) · [GitHub](https://github.com/CSOAI-ORG/ai-bom-mcp)
 - **AI Incident Reporting** → `uvx ai-incident-reporting-mcp` · [PyPI](https://pypi.org/project/ai-incident-reporting-mcp/) · [GitHub](https://github.com/CSOAI-ORG/ai-incident-reporting-mcp)
 
-Full catalogue + Anthropic Registry verify links: [meok.ai/anthropic-registry](https://meok.ai/anthropic-registry)
+Full catalogue + Anthropic Registry verify links: [https://meok.ai](https://meok.ai)
 
 
 ## Protocol coverage + Universal PAYG
