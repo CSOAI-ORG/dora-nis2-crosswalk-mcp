@@ -199,7 +199,7 @@ def _attestation(regulation, entity, score, findings, articles_audited, tier, in
 
 FREE_DAILY_LIMIT = 50
 _usage = defaultdict(list)
-STRIPE_199 = "https://buy.stripe.com/aFa7sNcgAdQS0ZT1Uc8k91t"
+STRIPE_199 = "https://meok.ai/pricing"
 
 def _rl(tier="free"):
     if tier in ("pro", "professional", "enterprise"): return None
@@ -207,7 +207,7 @@ def _rl(tier="free"):
     cutoff = now - timedelta(days=1)
     _usage["anonymous"] = [t for t in _usage["anonymous"] if t > cutoff]
     if len(_usage["anonymous"]) >= FREE_DAILY_LIMIT:
-        return f"Free tier limit ({FREE_DAILY_LIMIT}/day). Pro £199/mo: {STRIPE_199}"
+        return f"Free tier limit ({FREE_DAILY_LIMIT}/day). Pro a per-job quote: {STRIPE_199}"
     _usage["anonymous"].append(now)
     return None
 
@@ -251,7 +251,7 @@ def list_overlapping_obligations(api_key: str = "") -> CrosswalkResponse:
         crosswalk=crosswalk,
         overlap_percent_estimate=65,
         disclaimer="Estimate based on practitioner consensus 2024. Not legal advice.",
-        upsell_pro=f"Pro £199/mo: {STRIPE_199}" if tier == "free" else None
+        upsell_pro=f"Pro a per-job quote: {STRIPE_199}" if tier == "free" else None
     )
 
 @mcp.tool()
@@ -300,7 +300,7 @@ def check_dual_compliance(entity_name: str, controls_csv: str, api_key: str = ""
         entity=entity_name,
         overall_dual_compliance_percent=overall_score,
         obligations=results,
-        upsell_pro=f"Pro £199/mo: {STRIPE_199}" if tier == "free" else None
+        upsell_pro=f"Pro a per-job quote: {STRIPE_199}" if tier == "free" else None
     )
 
 @mcp.tool()
@@ -309,7 +309,7 @@ def sign_dual_compliance_attestation(entity_name: str, overall_score: float, fin
     allowed, msg, tier = _shared_check_access(api_key)
     if not allowed: return {"error": msg}
     if tier == "free":
-        return {"error": "Signed attestations require Pro (£199/mo)", "upgrade_url": STRIPE_199}
+        return {"error": "Signed attestations require Pro", "upgrade_url": STRIPE_199}
     
     findings = [f.strip() for f in findings_csv.split(",") if f.strip()]
     return _attestation(
@@ -331,10 +331,10 @@ if __name__ == "__main__":
     main()
 
 
-# ── MEOK monetization layer (Stripe upgrade · PAYG · pricing) ──────────
-# Free tier is zero-config. Upgrade to Pro (unlimited) or pay-as-you-go per call.
+# ── MEOK pricing pointer (pay per delivered job; no subscriptions) ──────────
+# No tiers. Jobs are quoted individually at https://meok.ai/pricing.
 import os as _meok_os
-MEOK_STRIPE_UPGRADE = "https://buy.stripe.com/aFa7sNcgAdQS0ZT1Uc8k91t"  # Pro (unlimited)
+MEOK_STRIPE_UPGRADE = "https://meok.ai/pricing"  # Pro (unlimited)
 MEOK_PAYG_KEY = _meok_os.environ.get("MEOK_PAYG_KEY", "")  # set to enable PAYG (x402 / ~GBP0.05 per call)
 MEOK_PRICING = "https://meok.ai/pricing"
 
